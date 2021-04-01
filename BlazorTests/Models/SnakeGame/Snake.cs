@@ -1,19 +1,25 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 
 namespace BlazorTests.Models.SnakeGame {
-    public class Snake {
+    public sealed class Snake {
         private readonly int _size;
         private readonly int _xLimit;
         private readonly int _yLimit;
+        private readonly int _tolerance;
+        private SnakeDirection _currentDirection;
 
         private double _xSpeed,
                        _ySpeed;
 
+        private readonly double _speed;
+
         public Snake(int size, int fieldWidth, int fieldHeight) {
             _size = size;
+            _speed = 1;
             _xLimit = fieldWidth - size;
             _yLimit = fieldHeight - size;
+            _tolerance = _size - 5;
         }
 
         public Cell Head => Tail[^1];
@@ -23,7 +29,8 @@ namespace BlazorTests.Models.SnakeGame {
             for (var i = 0; i < Tail.Count - 1; i++)
                 Tail[i] = Tail[i + 1];
 
-            Tail[^1] = new Cell(Head.X, Head.Y);
+            if(Tail.Count > 1)
+                Tail[^1] = new Cell(Head.X, Head.Y);
             
             Head.X += _xSpeed;
             Head.Y += _ySpeed;
@@ -39,31 +46,36 @@ namespace BlazorTests.Models.SnakeGame {
         }
 
         public void SetDirection(SnakeDirection snakeDirection) {
+            if (snakeDirection == _currentDirection)
+                return;
+            
             switch (snakeDirection) {
                 case SnakeDirection.Up:
-                    _xSpeed = 0;
-                    _ySpeed = -_size;
+                    _xSpeed = 0 * _speed;
+                    _ySpeed = -1 * _speed;
                     break;
                 case SnakeDirection.Down:
-                    _xSpeed = 0;
-                    _ySpeed = _size;
+                    _xSpeed = 0 * _speed;
+                    _ySpeed = 1 * _speed;
                     break;
                 case SnakeDirection.Left:
-                    _xSpeed = -_size;
-                    _ySpeed = 0;
+                    _xSpeed = -1 * _speed;
+                    _ySpeed = 0 * _speed;
                     break;
                 case SnakeDirection.Right:
-                    _xSpeed = _size;
-                    _ySpeed = 0;
+                    _xSpeed = 1 * _speed;
+                    _ySpeed = 0 * _speed;
                     break;
             }
+
+            _currentDirection = snakeDirection;
         }
 
         public bool Ate(Egg egg) {
-            if (egg.X == Head.X && egg.Y == Head.Y) {
-                var last = Tail.Last();
-                Tail.Add(new Cell(last.X, last.Y));
-
+            if (Math.Abs(egg.X - Head.X) < _tolerance && 
+                Math.Abs(egg.Y - Head.Y) < _tolerance) {
+                
+                IncreaseTail();
                 return true;
             }
 
@@ -76,6 +88,11 @@ namespace BlazorTests.Models.SnakeGame {
                     return true;
 
             return false;
+        }
+
+        public void IncreaseTail() {
+            Tail.Add(new Cell(Head.X - _size * _xSpeed, 
+                              Head.Y - _size * _ySpeed));
         }
     }
 }

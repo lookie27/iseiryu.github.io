@@ -1,6 +1,6 @@
 ﻿<Styled @bind-Classname="@snake">
-    width: @(_width)px;
-    height: @(_height)px;
+    width: @(possibleContentWidth)px;
+    height: @(possibleContentWidth)px;
 </Styled>
 
 <div id="snake_container" tabindex="0"
@@ -10,8 +10,8 @@
      class="@snake"
      @ref="_container">
     <Canvas id="snake_canvas"
-            width="@_width"
-            height="@_height"
+            width="@possibleContentWidth"
+            height="@possibleContentWidth"
             class="@snake"
             @ref="_canvas"></Canvas>
 </div>
@@ -20,5 +20,5 @@
     private string snake;
 
     [CascadingParameter]
-    protected int possibleContentWidth { get; set; }
+    internal int possibleContentWidth { get; set; }
 }
